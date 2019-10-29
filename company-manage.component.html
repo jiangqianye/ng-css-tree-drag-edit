@@ -1,0 +1,113 @@
+<div class='searchBar'>
+    <div nz-row>
+        <!--  组织结构设置 LOGO设置 系统名称设置 登录设置  -->
+        <div class='searchBarLeft'>
+            <nz-tabset class='text-center' nzSize="small" [(nzSelectedIndex)]="current">
+                <nz-tab [nzTitle]="'systemManage.companyManage.structure' | translate " (nzClick)='structureClick()'>
+                </nz-tab>
+                <nz-tab [nzTitle]="'systemManage.companyManage.logo' | translate "></nz-tab>
+                <nz-tab [nzTitle]="'systemManage.companyManage.sysname' | translate "></nz-tab>
+                <nz-tab [nzTitle]="'systemManage.companyManage.login' | translate "></nz-tab>
+            </nz-tabset>
+        </div>
+        <!-- 新增下级 新增平级 删除 -->
+        <div class='searchBarRight'>
+            <button class='searchBarButton searchBarButtonRight'
+                (click)='addJunior()'>{{'systemManage.companyManage.addjunior' | translate }}</button>
+            <button class='searchBarButton searchBarButtonRight'
+                (click)='addlevel()'>{{'systemManage.companyManage.addlevel' | translate }}</button>
+            <button class='searchBarButton '>{{'button.del' | translate }}</button>
+        </div>
+    </div>
+</div>
+
+
+
+<div *ngIf='current===0' class="table_content scrollbar">
+    <div class="tree table_content_tree" (drop)="drop($event)" (dragover)="allowDrop($event)">
+        <ul>
+
+            <ng-template #recursiveList let-structureArr>
+                <li *ngFor='let item of structureArr' draggable="true" (dragstart)="dragStart(item,$event)"
+                    (dragend)="dragEnd(item,$event)" [class]='"tree"+item.id'>
+                    <a *ngIf="item.name.length!==0" (dragenter)='dragenter(item)' (dragleave)='dragleave(item)'
+                        [class]='"text-truncate tree_a"+item.id' nz-popover [nzPopoverTitle]="item.name"
+                        nzPopoverPlacement="bottom" [nzPopoverContent]="contentTemplate"
+                        (nzVisibleChange)="selectedVal(item)">
+                        {{ item.name }}
+                    </a>
+                    <a *ngIf="item.name.length===0">
+                        <input nz-input [(ngModel)]="input_val" (blur)="inputBlur(item)" />
+                    </a>
+                    <ul *ngIf='item.children.length>0'>
+                        <ng-container *ngTemplateOutlet="recursiveList;context:{$implicit:item.children}">
+                        </ng-container>
+                    </ul>
+                </li>
+            </ng-template>
+            <ng-container *ngTemplateOutlet="recursiveList;context:{$implicit:structureArr}"></ng-container>
+
+
+            <!-- <li [class]='"tree"+structureArr.id'>
+                <a (dragenter)='dragenter(structureArr)' (dragleave)='dragleave(structureArr)'
+                    [class]='"text-truncate tree_a"+structureArr.id' nz-popover [nzPopoverTitle]="structureArr.name"
+                    nzPopoverPlacement="bottom" [nzPopoverContent]="contentTemplate"
+                    (nzVisibleChange)="selectedVal(structureArr)">
+                    {{ structureArr.name }}
+                </a>
+                <ul *ngIf='structureArr.children.length>0'>
+                    <li *ngFor='let item0 of structureArr.children' draggable="true"
+                        (dragstart)="dragStart(item0,$event)" (dragend)="dragEnd(item0,$event)"
+                        [class]='"tree"+item0.id'>
+                        <a (dragenter)='dragenter(item0)' (dragleave)='dragleave(item0)'
+                            [class]='"text-truncate tree_a"+item0.id' nz-popover [nzPopoverTitle]="item0.name"
+                            nzPopoverPlacement="bottom" [nzPopoverContent]="contentTemplate"
+                            (nzVisibleChange)="selectedVal(item0)">
+                            {{ item0.name }}
+                        </a>
+                        <ul *ngIf='item0.children.length>0'>
+                            <li *ngFor='let item1 of item0.children' draggable="true"
+                                (dragstart)="dragStart(item1,$event)" (dragend)="dragEnd(item1,$event)"
+                                [class]='"tree"+item1.id'>
+                                <a (dragenter)='dragenter(item1)' (dragleave)='dragleave(item1)'
+                                    [class]='"text-truncate tree_a"+item1.id' nz-popover [nzPopoverTitle]="item1.name"
+                                    nzPopoverPlacement="bottom" [nzPopoverContent]="contentTemplate"
+                                    (nzVisibleChange)="selectedVal(item1)">
+                                    {{ item1.name }}
+                                </a>
+                                <ul *ngIf='item1.children.length>0'>
+                                    <li *ngFor='let item2 of item1.children' draggable="true"
+                                        (dragstart)="dragStart(item2,$event)" (dragend)="dragEnd(item2,$event)"
+                                        [class]='"tree"+item2.id'>
+                                        <a (dragenter)='dragenter(item2)' (dragleave)='dragleave(item2)'
+                                            [class]='"text-truncate tree_a"+item2.id' nz-popover
+                                            [nzPopoverTitle]="item2.name" nzPopoverPlacement="bottom"
+                                            [nzPopoverContent]="contentTemplate" (nzVisibleChange)="selectedVal(item2)">
+                                            {{ item2.name }}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+              
+
+
+                </ul>
+            </li> -->
+        </ul>
+    </div>
+</div>
+
+<!-- 新增下级 新增平级 编辑 删除 -->
+<ng-template #contentTemplate>
+    <p class='point text-hover' (click)='addTreeNode("junior")'><i nz-icon nzType="plus"></i>
+        {{'systemManage.companyManage.addjunior' | translate }}</p>
+    <p class='point text-hover' (click)='addTreeNode("level")'> <i nz-icon nzType="plus"></i>
+        {{'systemManage.companyManage.addlevel' | translate }}</p>
+    <p class='point text-hover' (click)='editNode()'> <i nz-icon nzType="edit" nzTheme="outline"></i>
+        {{'modal.edit' | translate }}</p>
+    <p class='text-red-6 point' (click)='delNode()'> <i nz-icon nzType="delete" nzTheme="outline"></i>
+        {{'button.del' | translate }}</p>
+</ng-template>
